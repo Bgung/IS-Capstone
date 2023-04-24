@@ -12,9 +12,7 @@ void setup()
  
 void loop()
 {
-  delay(0.1);
   int D = digitalRead(BTN);
-  Serial.println(STATE);
   if(D == HIGH){
     if(STATE == 0) {
       STATE = 1;
@@ -42,21 +40,26 @@ void readOperation(RobotController robotController){
       Serial.println(power);
       switch(operation){
         case 'F':
+        case 'f':
           robotController.forward(power);
           break;
         case 'B':
+        case 'b':
           robotController.backward(power);
           break;
         case 'R':
+        case 'r':
           robotController.right(power);
           break;
         case 'L':
+        case 'l':
           robotController.left(power);
           break;
         case 'S':
+        case 's':
           robotController.stop();
           break;
-      }      
+      }
     }
   }
 }

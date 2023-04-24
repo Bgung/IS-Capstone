@@ -2,22 +2,6 @@
 
 #include "RobotController.hpp"
 
-namespace RobotControllerConstant{
-    unsigned int PWMA = 3;
-    unsigned int PWMB = 11;
-    unsigned int DIRA = 12;
-    unsigned int DIRB = 13;
-
-    unsigned int MOTOR_LEFT = 0;
-    unsigned int MOTOR_RIGHT = 1;
-
-    unsigned int CW = 1;
-    unsigned int CCW = 0;
-
-    unsigned int DEFAULT_POWER = 100;
-    unsigned int MAX_POWER = 255;
-}
-
 RobotController::RobotController() {
     pinMode(RobotControllerConstant::PWMA, OUTPUT);
     pinMode(RobotControllerConstant::PWMB, OUTPUT);

@@ -1,4 +1,5 @@
 import math
+import traceback
 
 import numpy as np
 
@@ -24,9 +25,10 @@ class LidarX2:
     self._port = port
     self._chunkSize = chunkSize
     self._is_connected = False
-    self._max_distance = 10000
+    self._min_distance = 100
+    self._max_distance = 8000
     self._LOCK = Lock()
-    self._results = dict()
+    self._results_polar = dict()
 
   def __enter__(self):
     self.__open__()
@@ -51,8 +53,7 @@ class LidarX2:
   def _startScan(self):
     if self._is_connected:
       self._last_chunk = None
-      self._scanThread = Thread(target=self._scan, args=())
-      self._scanThread.isDaemon = True
+      self._scanThread = Thread(target=self._scan, args=(), daemon=True, name="ScanThread")
       self._scanThread.start()
       return True
     return False
@@ -65,8 +66,9 @@ class LidarX2:
       return True
     return False
 
-  def __exit__(self, exc_type, exc_val, exc_tb):
-    print("Exception: ", exc_type, exc_val, exc_tb)
+  def __exit__(self, exc_type, exc_val, exc_tb: traceback):
+    print("YDLidarX2_3.__exit__(...) is called by: ", exc_type, exc_val)
+    traceback.print_tb(exc_tb)
     self._endScan()
     self.serial.close()
     self._is_connected = False
@@ -92,7 +94,7 @@ class LidarX2:
 
       for dataBlock in dataBlocks:
         self._analysisDataBlock(dataBlock)
-      self._cleanResults()
+      # self._cleanResults()
   
   # Analysis each data block
   def _analysisDataBlock(self, dataBlock):
@@ -112,6 +114,10 @@ class LidarX2:
     distances = list()
     for i in range(8, lenOfDataBlock - 1, 2):
       dist = round((dataBlock[i] + 256 * dataBlock[i + 1]) / 4)
+      if dist > self._max_distance:
+        dist = 0
+      if dist < self._min_distance:
+        dist = 0
       distances.append(dist)
     
     # First-level analysis
@@ -138,22 +144,20 @@ class LidarX2:
         angle -= 360
 
       if angle >= 0 and angle < 360:
-        self._results[str(angle)] = distance
+        self._results_polar[str(angle)] = distance
 
-  def _cleanResults(self):
-    self._LOCK.acquire()
-    for key in list(self._results.keys()):
-      key = float(key)
-      if key > 360 or key < 0:
-        print("Delete key: ", key, " value: ", self._results[key])
-        del self._results[key]
-    # if len(self._results.keys()) > 999:
-    #   print("Clrear results")
-    #   self._results = dict()
-    self._LOCK.release()
+  # def _cleanResults(self):
+  #   self._LOCK.acquire()
+  #   for key in list(self._results_polar.keys()):
+  #     key = float(key)
+  #     if key > 360 or key < 0:
+  #       print("Delete key: ", key, " value: ", self._results[key])
+  #       del self._results[key]
+  #   self._LOCK.release()
 
-  def getResutls(self) -> dict:
+  def getPolarResults(self) -> dict:
     self._LOCK.acquire()
-    results = self._results.copy()
+    results = self._results_polar.copy()
     self._LOCK.release()
     return results
+  
