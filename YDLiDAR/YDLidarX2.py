@@ -11,15 +11,6 @@ from threading import Thread, Lock
 from dataclasses import dataclass
 from typing import Union
 
-@dataclass
-class LidarMeasure:
-  def __init__(self, angle, distance):
-    self.angle = angle
-    self.distance = distance
-  def __repr__(self):
-    return {"Angle": self.angle, "Distance": self.distance}.__str__()
-  
-
 class LidarX2:
   def __init__(self, port: str="COM3", chunkSize: int = 2000):
     self._port = port
@@ -29,6 +20,7 @@ class LidarX2:
     self._max_distance = 8000
     self._LOCK = Lock()
     self._results_polar = dict()
+    self._results_cartesian = list()
 
   def __enter__(self):
     self.__open__()
@@ -113,7 +105,7 @@ class LidarX2:
     # Distance analysis
     distances = list()
     for i in range(8, lenOfDataBlock - 1, 2):
-      dist = round((dataBlock[i] + 256 * dataBlock[i + 1]) / 4)
+      dist = dataBlock[i] + 256 * dataBlock[i + 1]
       if dist > self._max_distance:
         dist = 0
       if dist < self._min_distance:
@@ -139,25 +131,24 @@ class LidarX2:
     # print(len(firstAnalysis), len(angleCorrections), len(distances))
     for angle_i, angleCorrection_i, distance_i in zip(firstAnalysis, angleCorrections, distances):
       angle = round(angle_i + angleCorrection_i)
-      distance = round(distance_i, 4)
+      distance = distance_i
       if angle >= 360:
         angle -= 360
 
       if angle >= 0 and angle < 360:
         self._results_polar[str(angle)] = distance
 
-  # def _cleanResults(self):
-  #   self._LOCK.acquire()
-  #   for key in list(self._results_polar.keys()):
-  #     key = float(key)
-  #     if key > 360 or key < 0:
-  #       print("Delete key: ", key, " value: ", self._results[key])
-  #       del self._results[key]
-  #   self._LOCK.release()
+  def _cleanResults(self):
+    self._LOCK.acquire()
+    for key in list(self._results_polar.keys()):
+      key = float(key)
+      if 0 > key or key < 360:
+        print("Delete key: ", key, " value: ", self._results[key])
+        del self._results_polar[key]
+    self._LOCK.release()
 
   def getPolarResults(self) -> dict:
     self._LOCK.acquire()
     results = self._results_polar.copy()
     self._LOCK.release()
     return results
-  

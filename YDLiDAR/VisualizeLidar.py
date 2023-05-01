@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 
-import threading as thread
+from typing import Tuple
 
 class VisualizeLidar():
   eraseCount = 10
@@ -13,16 +13,17 @@ class VisualizeLidar():
     self.canvas = np.zeros((canvasW, canvasH, 3), np.uint8)
     self.canvasCenter = (int(canvasW / 2), int(canvasH / 2))
     self.lidarPolarResults = dict()
+    self.SCALE_FACTOR = 30
 
   def toCartesian(self, angle_deg: float, distance: float):
-    SCALE_FACTOR = 15
-    angle_rad = (angle_deg - 90) * (math.pi / 180)
-    x = ((distance / SCALE_FACTOR) * math.cos(angle_rad)) + self.canvasCenter[0]
-    y = ((distance / SCALE_FACTOR) * math.sin(angle_rad)) + self.canvasCenter[1]
+    angle_rad = (angle_deg + 90) * (math.pi / 180)
+    x = ((distance / self.SCALE_FACTOR) * math.cos(angle_rad))
+    y = ((distance / self.SCALE_FACTOR) * math.sin(angle_rad))
     return int(x), int(y)
 
-  def eraseBackground(self, color: tuple=(0, 0, 0)):
-    self.canvas.fill(0)
+  def eraseBackground(self, color: tuple=(50, 150, 0)):
+    for c in range(3):
+      self.canvas[:, :, c].fill(color[c])
     self.drawCenterPoint()
     self.drawLidarHeading()
   
@@ -30,32 +31,53 @@ class VisualizeLidar():
     cv2.circle(self.canvas, self.canvasCenter, 3, color, -1)
 
   def drawLidarHeading(self, color: tuple=(0, 255, 0)):
-    endPoint = self.toCartesian(0, 8000)
-    cv2.line(self.canvas, self.canvasCenter, endPoint, color, 1)
+    point = (0 + self.canvasCenter[0], 0)
+    cv2.line(self.canvas, self.canvasCenter, point, color, 1)
 
-  def drawPoints(self):
+  def drawPolarPoints(self):
     if self.lidarPolarResults == None:
       return
-    if self.eraseCount > 1:
+    if self.eraseCount > 5:
       self.eraseBackground()
       self.eraseCount = 0
     for angle, distance in self.lidarPolarResults.items():
-      self.drawPoint(angle, distance)
+      self.drawPolarPoint(angle, distance)
 
     cv2.imshow('lidar', self.canvas)
 
     self.eraseCount += 1
 
-  def drawPoint(self, angle: str, distance: str, color: tuple=(255, 255, 255)):
+  def drawCartesianPoints(self):
+    if self.eraseCount > 1:
+      self.eraseBackground()
+      self.eraseCount = 0
+    for point in self.lidarCartesianResults:
+      self.drawCartesianPoint(point)
+
+    cv2.imshow('lidar', self.canvas)
+
+    self.eraseCount += 1
+
+
+  def drawPolarPoint(self, angle: str, distance: str, color: tuple=(255, 255, 255)):
     if distance != 0:
       angle, distance = float(angle), float(distance)
       x, y = self.toCartesian(angle, distance)
-      if x > 0 and x < self.canvasW and y > 0 and y < self.canvasH:
-        point = (int(x), int(y))
-        cv2.circle(self.canvas, point, 1, color, -1)
+      self.drawCartesianPoint(x, y, color)
+
+  def drawCartesianPoint(self, x: int, y: int, color: tuple=(255, 255, 255)):
+    x, y = (int(x + self.canvasCenter[0]), int(y + self.canvasCenter[1]))
+    self.drawPoint(x, y, color)
+
+  def drawPoint(self, x: int, y: int, color: tuple=(255, 255, 255)):
+    if x > 0 and x < self.canvasW and y > 0 and y < self.canvasH:
+      cv2.circle(self.canvas, (x, y), 3, color, -1)
 
   def updatePolarResults(self, lidarResults: dict):
     self.lidarPolarResults = lidarResults
+
+  def updateCartesianResults(self, lidarResults: list):
+    self.lidarCartesianResults = lidarResults
 
 import YDLidarX2 as YDLidar
 
@@ -65,45 +87,8 @@ visualizeLidar = VisualizeLidar(800, 800)
 with lidar as Lidar:
   time.sleep(1)
   while True:
-    # time.sleep(0.01)
     polarResults = lidar.getPolarResults()
     visualizeLidar.updatePolarResults(polarResults)
-    visualizeLidar.drawPoints()
+    visualizeLidar.drawPolarPoints()
     if cv2.waitKey(1) & 0xFF == ord('q'):
-      print(polarResults)
       break
-
-# import LidarX2_copy as LidarX2
-
-# Lidar = LidarX2.LidarX2()
-# visualizeLidar = VisualizeLidar(800, 800)
-
-# with Lidar as lidar:
-#   time.sleep(1)
-#   while True:
-#     results = lidar.getMeasures()
-#     visualizeLidar.updateResults(results)
-#     visualizeLidar.drawPoints()
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#       break
-
-# cv2.destroyAllWindows()
-
-# from LidarX2_2 import LidarX2
-# from VisualizeLidar import VisualizeLidar
-# from threading import Thread
-
-# lidarX2 = LidarX2("COM3")
-# visualizeLidar = VisualizeLidar(800, 800)
-
-# lidarX2.Connect()
-
-# measure_thread = Thread(target=lidarX2.getMeasures)
-# measure_thread.start()
-# measure_thread.join()
-# while True:
-#   # print(lidarX2.measureList)
-#   visualizeLidar.updateResults(lidarX2.measureList)
-#   visualizeLidar.drawPoints()
-#   if cv2.waitKey(1) & 0xFF == ord('q'):
-#       break
