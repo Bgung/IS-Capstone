@@ -1,91 +1,173 @@
 #include <Arduino.h>
 
 #include "RobotController.hpp"
+#include "RobotControllerConstant.hpp"
+
+#ifndef PINMAP
+
+#define PWMA 4
+#define DIRA1 A4
+#define DIRA2 A5
+
+#define PWMB 6
+#define DIRB1 43
+#define DIRB2 42
+
+#define PWMC 11
+#define DIRC1 34
+#define DIRC2 35
+
+#define PWMD 7
+#define DIRD1 37
+#define DIRD2 36
+
+#define FORWARD 1
+#define BACKWARD 0
+
+#define PINMAP
+#endif
 
 RobotController::RobotController() {
-    pinMode(RobotControllerConstant::PWMA, OUTPUT);
-    pinMode(RobotControllerConstant::PWMB, OUTPUT);
-    pinMode(RobotControllerConstant::DIRA, OUTPUT);
-    pinMode(RobotControllerConstant::DIRB, OUTPUT);
+    pinMode(PWMA, OUTPUT);
+    pinMode(PWMB, OUTPUT);
+    pinMode(PWMC, OUTPUT);
+    pinMode(PWMD, OUTPUT);
 
-    digitalWrite(RobotControllerConstant::PWMA, LOW);
-    digitalWrite(RobotControllerConstant::PWMB, LOW);
-    digitalWrite(RobotControllerConstant::DIRA, LOW);
-    digitalWrite(RobotControllerConstant::DIRB, LOW);
+    pinMode(DIRA1, OUTPUT);
+    pinMode(DIRA2, OUTPUT);
+    pinMode(DIRB1, OUTPUT);
+    pinMode(DIRB2, OUTPUT);
+    pinMode(DIRC1, OUTPUT);
+    pinMode(DIRC2, OUTPUT);
+    pinMode(DIRD1, OUTPUT);
+    pinMode(DIRD2, OUTPUT);
 }
 
-void RobotController::forward(unsigned char velocity) {
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_LEFT,
-      RobotControllerConstant::CW,
-      velocity
-    );
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_RIGHT,
-      RobotControllerConstant::CCW,
-      velocity
-    );
-}
-
-void RobotController::backward(unsigned char velocity) {
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_LEFT,
-      RobotControllerConstant::CCW,
-      velocity
-    );
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_RIGHT,
-      RobotControllerConstant::CW,
-      velocity
-    );
-}
-
-void RobotController::right(unsigned char velocity) {
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_LEFT,
-      RobotControllerConstant::CCW,
-      velocity
-    );
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_RIGHT,
-      RobotControllerConstant::CCW,
-      velocity
-    );
-}
-
-void RobotController::left(unsigned char velocity) {
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_LEFT,
-      RobotControllerConstant::CW,
-      velocity
-    );
-    this->driveArdumoto(
-      RobotControllerConstant::MOTOR_RIGHT,
-      RobotControllerConstant::CW,
-      velocity
-    );
-}
-
-void RobotController::driveArdumoto(unsigned int motor, unsigned int dir, unsigned int spd) {
-    if(motor == RobotControllerConstant::MOTOR_LEFT) {
-        digitalWrite(RobotControllerConstant::DIRA, dir);
-        analogWrite(RobotControllerConstant::PWMA, spd);
-    } else if(motor == RobotControllerConstant::MOTOR_RIGHT) {
-        digitalWrite(RobotControllerConstant::DIRB, dir);
-        analogWrite(RobotControllerConstant::PWMB, spd);
+void RobotController::driveMotor(unsigned int motor, unsigned int dir, unsigned int spd) {
+    if(motor == this->MOTOR_FL) {
+        digitalWrite(DIRA1, dir);
+        digitalWrite(DIRA2, !dir);
+        analogWrite(PWMA, spd);
+    } else if(motor == this->MOTOR_FR) {
+        digitalWrite(DIRB1, dir);
+        digitalWrite(DIRB2, !dir);
+        analogWrite(PWMB, spd);
+    } 
+    if(motor == this->MOTOR_BL) {
+        digitalWrite(DIRC1, dir);
+        digitalWrite(DIRC2, !dir);
+        analogWrite(PWMC, spd);
+    } else if(motor == this->MOTOR_BR) {
+        digitalWrite(DIRD1, dir);
+        digitalWrite(DIRD2, !dir);
+        analogWrite(PWMD, spd);
     }
 }
 
-void RobotController::stopArdumoto(unsigned int motor) {
-    this->driveArdumoto(motor, 0, 0);
+void RobotController::forward(unsigned int power) {
+    this->driveMotor(
+      this->MOTOR_FL,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_FR,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BL,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BR,
+      FORWARD,
+      power
+    );
+}
+
+void RobotController::backward(unsigned int power) {
+    this->driveMotor(
+      this->MOTOR_FL,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_FR,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BL,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BR,
+      BACKWARD,
+      power
+    );
+}
+
+void RobotController::right(unsigned int power) {
+    this->driveMotor(
+      this->MOTOR_FL,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_FR,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BL,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BR,
+      BACKWARD,
+      power
+    );
+}
+
+void RobotController::left(unsigned int power) {
+    this->driveMotor(
+      this->MOTOR_FL,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_FR,
+      FORWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BL,
+      BACKWARD,
+      power
+    );
+    this->driveMotor(
+      this->MOTOR_BR,
+      FORWARD,
+      power
+    );
 }
 
 void RobotController::stop() {
-    this->stopArdumoto(RobotControllerConstant::MOTOR_LEFT);
-    this->stopArdumoto(RobotControllerConstant::MOTOR_RIGHT);
+    this->stopMotor(this->MOTOR_FL);
+    this->stopMotor(this->MOTOR_FR);
+    this->stopMotor(this->MOTOR_BL);
+    this->stopMotor(this->MOTOR_BR);
 }
 
-void RobotController::setSpeedAndDirection(float speed, float direction) {
+void RobotController::stopMotor(unsigned int motor) {
+    this->driveMotor(motor, FORWARD, 0);
+}
+
+void RobotController::setSpeedAndDirection(unsigned int speed, float direction) {
     if(speed == 0) {
         this->stop();
     } else if(speed > 0) {
@@ -105,4 +187,12 @@ void RobotController::setSpeedAndDirection(float speed, float direction) {
             this->right(speed);
         }
     }
+}
+
+void RobotController::setIsInterrupted(bool isInterrupted) {
+    this->isInterrupted = isInterrupted;
+}
+
+bool RobotController::getIsInterrupted() {
+    return this->isInterrupted;
 }

@@ -4,12 +4,8 @@ import traceback
 import numpy as np
 
 from serial import Serial #pip install pySerial
-from time import sleep
-from math import atan, pi
 from threading import Thread, Lock
-
-from dataclasses import dataclass
-from typing import Union
+from typing import Dict
 
 class LidarX2:
   def __init__(self, port: str="COM3", chunkSize: int = 2000):
@@ -28,6 +24,9 @@ class LidarX2:
     return self
 
   def __open__(self):
+    '''
+    Open the serial port and prepare for the scan
+    '''
     if self._is_connected:
       return True
     try:
@@ -43,6 +42,9 @@ class LidarX2:
     return self._is_connected
 
   def _startScan(self):
+    '''
+    Start the scan thread
+    '''
     if self._is_connected:
       self._last_chunk = None
       self._scanThread = Thread(target=self._scan, args=(), daemon=True, name="ScanThread")
@@ -51,6 +53,9 @@ class LidarX2:
     return False
   
   def _endScan(self):
+    '''
+    End the scan thread
+    '''
     if self._is_connected:
       self._scanThread.join()
       self._scanThread = None
@@ -59,6 +64,9 @@ class LidarX2:
     return False
 
   def __exit__(self, exc_type, exc_val, exc_tb: traceback):
+    '''
+    Close the serial port and end the scan thread
+    '''
     print("YDLidarX2_3.__exit__(...) is called by: ", exc_type, exc_val)
     traceback.print_tb(exc_tb)
     self._endScan()
@@ -128,7 +136,6 @@ class LidarX2:
       angleCorrections.append(angleCorrection)
 
     # Intergrate analysis
-    # print(len(firstAnalysis), len(angleCorrections), len(distances))
     for angle_i, angleCorrection_i, distance_i in zip(firstAnalysis, angleCorrections, distances):
       angle = round(angle_i + angleCorrection_i)
       distance = distance_i
@@ -147,8 +154,20 @@ class LidarX2:
         del self._results_polar[key]
     self._LOCK.release()
 
-  def getPolarResults(self) -> dict:
+  def getPolarResults(self) -> Dict[str, int]:
+    '''
+    Get the polar coordinate results
+    Dictionalry: {angle(Radian): distance(mm)}
+    '''
     self._LOCK.acquire()
     results = self._results_polar.copy()
     self._LOCK.release()
     return results
+
+### 사용법 참고하세요 ###
+
+# lidar = LidarX2() # 객체 만들고
+# with lidar: # with문으로 열어서 사용 => 자동으로 스캔 시작.
+#             # with문을 벗어나면 자동으로 Serial 연결 끊어지고, Thread 종료함
+#   result = lidar.getPolarResults() # 극좌표계 결과 받아오기
+

@@ -1,33 +1,21 @@
-
-namespace RobotControllerConstant{
-    unsigned int PWMA = 3;
-    unsigned int PWMB = 11;
-    unsigned int DIRA = 12;
-    unsigned int DIRB = 13;
-
-    unsigned int MOTOR_LEFT = 0;
-    unsigned int MOTOR_RIGHT = 1;
-
-    unsigned int CW = 1;
-    unsigned int CCW = 0;
-
-    unsigned int DEFAULT_POWER = 100;
-    unsigned int MAX_POWER = 255;
-}
-
 class RobotController {
-private:
-    unsigned int speed = 100;
-    unsigned char direction = 0;
-public:
+  private:
+    unsigned int MOTOR_FL = 0; // Front Left
+    unsigned int MOTOR_FR = 1; // Front Right
+    unsigned int MOTOR_BL = 2; // Back Left
+    unsigned int MOTOR_BR = 3; // Back Right
+    bool isInterrupted = false;
+  public:
     RobotController();
-    void driveArdumoto(unsigned int motor, unsigned int dir, unsigned int speed);
-    void stopArdumoto(unsigned int motor);
-    void forward(unsigned char velocity);
-    void backward(unsigned char velocity);
-    void right(unsigned char velocity);
-    void left(unsigned char velocity);
-    void setSpeedAndDirection(float speed, float direction);
+    void driveMotor(unsigned int motor, unsigned int dir, unsigned int spd);
+    void stopMotor(unsigned int motor);
+    void forward(unsigned int power);
+    void backward(unsigned int power);
+    void right(unsigned int power);
+    void left(unsigned int power);
+    void setSpeedAndDirection(unsigned int speed, float direction);
     void stop();
+    
+    void setIsInterrupted(bool isInterrupted);
+    bool getIsInterrupted();
 };
-
