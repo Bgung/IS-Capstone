@@ -1,9 +1,15 @@
+#include "Motor.hpp"
+
+
 class RobotController {
   private:
-    unsigned int MOTOR_FL = 0; // Front Left
-    unsigned int MOTOR_FR = 1; // Front Right
-    unsigned int MOTOR_BL = 2; // Back Left
-    unsigned int MOTOR_BR = 3; // Back Right
+    unsigned int currentSpeed = 0;
+    
+    Motor *motorLF = new Motor(18, 31, 11, 34, 35, true);
+    Motor *motorLF = new Motor(19, 38, 7, 36, 37, false);
+    Motor *motorLF = new Motor(3, 49, 6, 43, 42, true);
+    Motor *motorLF = new Motor(2, A1, 4, A5, A4, false);
+
     bool isInterrupted = false;
   public:
     RobotController();
@@ -13,6 +19,10 @@ class RobotController {
     void backward(unsigned int power);
     void right(unsigned int power);
     void left(unsigned int power);
+
+    void setCurrentSpeed(unsigned int currentSpeed);
+    unsigned int getCurrentSpeed();
+
     void setSpeedAndDirection(unsigned int speed, float direction);
     void stop();
     
