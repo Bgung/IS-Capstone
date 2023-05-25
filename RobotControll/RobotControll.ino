@@ -1,6 +1,8 @@
 #include "RobotController.hpp"
+// #include "GyroSensor.hpp"
 
 RobotController robotController;
+// GyroSensor gyroSensor;
 
 #define BTN_PIN 10
 
@@ -9,6 +11,7 @@ void setup()
   pinMode(BTN_PIN, INPUT);
   Serial.begin(115200);
   robotController = RobotController();
+  // gyroSensor = GyroSensor();
 }
  
 void loop()
@@ -24,6 +27,7 @@ void loop()
   } else {
     readOperation(robotController);
   }
+  // Serial.println(gyroSensor.getAccelX_g());
 }
 
 void readOperation(RobotController robotController){

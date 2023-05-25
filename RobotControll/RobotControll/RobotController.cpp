@@ -43,70 +43,62 @@ RobotController::RobotController() {
     pinMode(DIRD2, OUTPUT);
 }
 
-void RobotController::driveMotor(unsigned int motor, unsigned int dir, unsigned int spd) {
+void RobotController::driveMotor(unsigned int motor, unsigned int dir) {
     if(motor == this->MOTOR_FL) {
         digitalWrite(DIRA1, dir);
         digitalWrite(DIRA2, !dir);
-        analogWrite(PWMA, spd);
+        analogWrite(PWMA, this->cur_speed);
     } else if(motor == this->MOTOR_FR) {
         digitalWrite(DIRB1, dir);
         digitalWrite(DIRB2, !dir);
-        analogWrite(PWMB, spd);
+        analogWrite(PWMB, this->cur_speed);
     }
     if(motor == this->MOTOR_BL) {
         digitalWrite(DIRC1, 1);
         digitalWrite(DIRC2, 0);
-        analogWrite(PWMC, spd);
+        analogWrite(PWMC, this->cur_speed);
     } else if(motor == this->MOTOR_BR) {
         digitalWrite(DIRD1, 1);
         digitalWrite(DIRD2, 0);
-        analogWrite(PWMD, spd);
+        analogWrite(PWMD, this->cur_speed);
     }
 }
 
-void RobotController::forward(unsigned int power) {
+void RobotController::forward() {
     this->driveMotor(
       this->MOTOR_FL,
-      FORWARD,
-      power
+      FORWARD
     );
     this->driveMotor(
       this->MOTOR_FR,
-      FORWARD,
-      power
+      FORWARD
     );
     this->driveMotor(
       this->MOTOR_BL,
-      FORWARD,
-      power
+      FORWARD
     );
     this->driveMotor(
       this->MOTOR_BR,
-      FORWARD,
-      power
+      FORWARD
     );
 }
 
-void RobotController::backward(unsigned int power) {
+void RobotController::backward() {
     this->driveMotor(
       this->MOTOR_FL,
-      BACKWARD,
-      power
+      BACKWARD
     );
     this->driveMotor(
       this->MOTOR_FR,
-      BACKWARD,
-      power
+      BACKWARD
     );
     this->driveMotor(
       this->MOTOR_BL,
-      BACKWARD,
-      power
+      BACKWARD
     );
     this->driveMotor(
       this->MOTOR_BR,
-      BACKWARD,
-      power
+      BACKWARD
     );
 }
 
