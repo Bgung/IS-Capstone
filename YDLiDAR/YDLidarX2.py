@@ -3,6 +3,7 @@ import traceback
 
 import numpy as np
 
+from copy import copy
 from serial import Serial #pip install pySerial
 from threading import Thread, Lock
 from typing import Dict
@@ -15,7 +16,7 @@ class LidarX2:
     self._min_distance = 100
     self._max_distance = 8000
     self._LOCK = Lock()
-    self._results_polar = dict()
+    self._results_polar = {str(key): 0 for key in range(360)}
     self._results_cartesian = list()
 
   def __enter__(self):
@@ -47,7 +48,7 @@ class LidarX2:
     '''
     if self._is_connected:
       self._last_chunk = None
-      self._scanThread = Thread(target=self._scan, args=(), daemon=True, name="ScanThread")
+      self._scanThread = Thread(target=self._scan, args=(), daemon=False, name="ScanThread")
       self._scanThread.start()
       return True
     return False
@@ -67,7 +68,7 @@ class LidarX2:
     '''
     Close the serial port and end the scan thread
     '''
-    print("YDLidarX2_3.__exit__(...) is called by: ", exc_type, exc_val)
+    print("YDLidarX2.__exit__(...) is called by: ", exc_type, exc_val)
     traceback.print_tb(exc_tb)
     self._endScan()
     self.serial.close()
@@ -160,14 +161,16 @@ class LidarX2:
     Dictionalry: {angle(Radian): distance(mm)}
     '''
     self._LOCK.acquire()
-    results = self._results_polar.copy()
+    results = copy(self._results_polar)
     self._LOCK.release()
     return results
 
 ### 사용법 참고하세요 ###
 
-# lidar = LidarX2() # 객체 만들고
-# with lidar: # with문으로 열어서 사용 => 자동으로 스캔 시작.
-#             # with문을 벗어나면 자동으로 Serial 연결 끊어지고, Thread 종료함
-#   result = lidar.getPolarResults() # 극좌표계 결과 받아오기
+Lidar = LidarX2() # 객체 만들고
+with Lidar as lidar: # with문으로 열어서 사용 => 자동으로 스캔 시작.
+            # with문을 벗어나면 자동으로 Serial 연결 끊어지고, Thread 종료함
+  while True:
+    result = lidar.getPolarResults() # 극좌표계 결과 받아오기
+    print(result)
 

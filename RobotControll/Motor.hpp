@@ -5,7 +5,7 @@ private:
   Encoder *_encoder;
   bool encoderReversed;
   int _motorPWM, _motorDir1, _motorDir2;
-  int _currentSpeed;
+  int _speed;
 public:
   Motor(int encoderA, int encoderB, int pinPWM, int dir1, int dir2, bool encoderReversed);
   void setSpeed(int speed);
@@ -14,4 +14,4 @@ public:
   void hardStop();
 
   long getEncoderPosition();
-}
+};

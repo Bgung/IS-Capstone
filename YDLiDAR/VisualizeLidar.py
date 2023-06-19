@@ -88,13 +88,13 @@ class VisualizeLidar():
       x2, y2 = self.toCartesian(angle2, distance2)
       # if math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) > THRESHOLD:
       #   continue
-      cv2.line(
-        self.canvas,
-        (x1 + self.canvasCenter[0], y1 + self.canvasCenter[1]),
-        (x2 + self.canvasCenter[0], y2 + self.canvasCenter[1]),
-        color,
-        3
-      )
+      # cv2.line(
+      #   self.canvas,
+      #   (x1 + self.canvasCenter[0], y1 + self.canvasCenter[1]),
+      #   (x2 + self.canvasCenter[0], y2 + self.canvasCenter[1]),
+      #   color,
+      #   3
+      # )
 
   def drawPolarPoint(self, angle: str, distance: float, color: tuple=(255, 255, 255)):
     if distance != 0:

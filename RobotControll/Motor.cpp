@@ -22,7 +22,6 @@ void Motor::setSpeed(int speed) {
   if(speed != 0) {
     this->_speed = speed;
   }
-
   if(this->_speed > 0) {
     digitalWrite(this->_motorDir1, HIGH);
     digitalWrite(this->_motorDir2, LOW);

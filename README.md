@@ -1,2 +1,2 @@
 # IS-Capstone
-HSU Intelligent system track Capstone design
+6조: 강민아(2071442), 김민재(2071515), 오채영(2071357)

@@ -31,127 +31,54 @@
 #endif
 
 RobotController::RobotController() {
-    pinMode(PWMA, OUTPUT);
-    pinMode(PWMB, OUTPUT);
-    pinMode(PWMC, OUTPUT);
-    pinMode(PWMD, OUTPUT);
+    // pinMode(PWMA, OUTPUT);
+    // pinMode(PWMB, OUTPUT);
+    // pinMode(PWMC, OUTPUT);
+    // pinMode(PWMD, OUTPUT);
 
-    pinMode(DIRA1, OUTPUT);
-    pinMode(DIRA2, OUTPUT);
-    pinMode(DIRB1, OUTPUT);
-    pinMode(DIRB2, OUTPUT);
-    pinMode(DIRC1, OUTPUT);
-    pinMode(DIRC2, OUTPUT);
-    pinMode(DIRD1, OUTPUT);
-    pinMode(DIRD2, OUTPUT);
-}
-
-void RobotController::driveMotor(unsigned int motor, unsigned int dir) {
-    if(motor == this->MOTOR_FL) {
-        digitalWrite(DIRA1, dir);
-        digitalWrite(DIRA2, !dir);
-        analogWrite(PWMA, this->currentSpeed);
-    } else if(motor == this->MOTOR_FR) {
-        digitalWrite(DIRB1, dir);
-        digitalWrite(DIRB2, !dir);
-        analogWrite(PWMB, this->currentSpeed);
-    }
-    if(motor == this->MOTOR_BL) {
-        digitalWrite(DIRC1, 1);
-        digitalWrite(DIRC2, 0);
-        analogWrite(PWMC, this->currentSpeed);
-    } else if(motor == this->MOTOR_BR) {
-        digitalWrite(DIRD1, 1);
-        digitalWrite(DIRD2, 0);
-        analogWrite(PWMD, this->currentSpeed);
-    }
+    // pinMode(DIRA1, OUTPUT);
+    // pinMode(DIRA2, OUTPUT);
+    // pinMode(DIRB1, OUTPUT);
+    // pinMode(DIRB2, OUTPUT);
+    // pinMode(DIRC1, OUTPUT);
+    // pinMode(DIRC2, OUTPUT);
+    // pinMode(DIRD1, OUTPUT);
+    // pinMode(DIRD2, OUTPUT);
 }
 
 void RobotController::forward() {
-    this->driveMotor(
-      this->MOTOR_FL,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_FR,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BL,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BR,
-      FORWARD
-    );
+  this->motorFL->setSpeed(this->currentSpeed);
+  this->motorFR->setSpeed(this->currentSpeed);
+  // this->motorBL->setSpeed(this->currentSpeed);
+  // this->motorBR->setSpeed(this->currentSpeed);
 }
 
 void RobotController::backward() {
-    this->driveMotor(
-      this->MOTOR_FL,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_FR,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BL,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BR,
-      BACKWARD
-    );
+  this->motorFL->setSpeed(-this->currentSpeed);
+  this->motorFR->setSpeed(-this->currentSpeed);
+  // this->motorBL->setSpeed(-this->currentSpeed);
+  // this->motorBR->setSpeed(-this->currentSpeed);
 }
 
 void RobotController::right() {
-    this->driveMotor(
-      this->MOTOR_FL,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_FR,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BL,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BR,
-      BACKWARD
-    );
+  this->motorFL->setSpeed(this->currentSpeed);
+  this->motorFR->setSpeed(-this->currentSpeed);
+  // this->motorBL->setSpeed(-this->currentSpeed);
+  // this->motorBR->setSpeed(this->currentSpeed);
 }
 
 void RobotController::left() {
-    this->driveMotor(
-      this->MOTOR_FL,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_FR,
-      FORWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BL,
-      BACKWARD
-    );
-    this->driveMotor(
-      this->MOTOR_BR,
-      FORWARD
-    );
+  this->motorFL->setSpeed(-this->currentSpeed);
+  this->motorFR->setSpeed(this->currentSpeed);
+  // this->motorBL->setSpeed(this->currentSpeed);
+  // this->motorBR->setSpeed(-this->currentSpeed);
 }
 
 void RobotController::stop() {
-    this->stopMotor(this->MOTOR_FL);
-    this->stopMotor(this->MOTOR_FR);
-    this->stopMotor(this->MOTOR_BL);
-    this->stopMotor(this->MOTOR_BR);
-}
-
-void RobotController::stopMotor(unsigned int motor) {
-    this->driveMotor(motor, FORWARD, 0);
+  this->motorFL->hardStop();
+  this->motorFR->hardStop();
+  // this->motorBL->hardStop();
+  // this->motorBR->hardStop();
 }
 
 void RobotController::setCurrentSpeed(unsigned int currentSpeed) {
@@ -162,27 +89,13 @@ unsigned int RobotController::getCurrentSpeed() {
     return this->currentSpeed;
 }
 
-
-void RobotController::setSpeedAndDirection(unsigned int speed, float direction) {
-    if(speed == 0) {
-        this->stop();
-    } else if(speed > 0) {
-        if(direction == 0) {
-            this->forward(speed);
-        } else if(direction > 0) {
-            this->right(speed);
-        } else if(direction < 0) {
-            this->left(speed);
-        }
-    } else if(speed < 0) {
-        if(direction == 0) {
-            this->backward(speed);
-        } else if(direction > 0) {
-            this->left(speed);
-        } else if(direction < 0) {
-            this->right(speed);
-        }
-    }
+long* RobotController::getEncoderPositions() {
+    long* encoderPositions = new long[4];
+    encoderPositions[0] = this->motorFL->getEncoderPosition();
+    encoderPositions[1] = this->motorFR->getEncoderPosition();
+    encoderPositions[2] = this->motorBL->getEncoderPosition();
+    encoderPositions[3] = this->motorBR->getEncoderPosition();
+    return encoderPositions;
 }
 
 void RobotController::setIsInterrupted(bool isInterrupted) {
